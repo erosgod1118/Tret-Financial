@@ -64,8 +64,6 @@ from, running tret-financial is then as easy as:
 	  -port 8080 \
 	  -base src/github.com/aclindsa/tret-financial/
 
-You should then be able to explore tret-financial by visiting http://localhost:8080 in
-your browser.
 
 ## Missing Features
 
