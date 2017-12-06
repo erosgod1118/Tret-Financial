@@ -37,11 +37,11 @@ First, install npm, nodejs >= 6.11.3 (may work on older 6.x.x releases, but this
 is untested), python, curl, and go >= 1.9 in your distribution. Here is how in
 Arch Linux:
 
-	$ sudo pacman -S npm curl go python
+	sudo pacman -S npm curl go python
 
 Install browserify globally using npm:
 
-	$ sudo npm install -g browserify
+	sudo npm install -g browserify
 
 You'll then want to build everything (the Golang and Javascript portions) using
 something like:
@@ -63,7 +63,6 @@ from, running tret-financial is then as easy as:
 	$ ./bin/tret-financial \
 	  -port 8080 \
 	  -base src/github.com/aclindsa/tret-financial/
-
 
 ## Missing Features
 
