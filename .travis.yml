@@ -1,0 +1,69 @@
+language: go
+
+os:
+  - linux
+  - osx
+
+go:
+  - 1.9.x
+  - master
+
+services:
+  - mysql
+  - postgresql
+
+env:
+  global:
+    - DEP_VERSION="0.3.2"
+  matrix:
+    - MONEYGO_TEST_DB=sqlite
+    - MONEYGO_TEST_DB=mysql
+    - MONEYGO_TEST_DB=postgres
+
+# OSX builds take too long, so don't wait for them
+matrix:
+  fast_finish: true
+  allow_failures:
+    - os: osx
+
+before_install:
+  # Fetch/build coverage reporting tools
+  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
+  - go install github.com/mattn/goveralls
+  # Download `dep` and ensure it's executable
+  - if [ $TRAVIS_OS_NAME = 'linux' ]; then curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 -o $GOPATH/bin/dep; fi
+  - if [ $TRAVIS_OS_NAME = 'osx'   ]; then curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-darwin-amd64 -o $GOPATH/bin/dep; fi
+  - chmod +x $GOPATH/bin/dep
+  # Install and start MySQL or Postgres if on OSX
+  - if [ $TRAVIS_OS_NAME = 'osx' ] && [ $MONEYGO_TEST_DB = 'mysql'    ]; then brew update > /dev/null && brew install mariadb && mysql.server start; fi
+  - if [ $TRAVIS_OS_NAME = 'osx' ] && [ $MONEYGO_TEST_DB = 'postgres' ]; then brew update > /dev/null; fi
+  - if [ $TRAVIS_OS_NAME = 'osx' ] && [ $MONEYGO_TEST_DB = 'postgres' ]; then rm -rf /usr/local/var/postgres; fi
+  - if [ $TRAVIS_OS_NAME = 'osx' ] && [ $MONEYGO_TEST_DB = 'postgres' ]; then initdb /usr/local/var/postgres; fi
+  - if [ $TRAVIS_OS_NAME = 'osx' ] && [ $MONEYGO_TEST_DB = 'postgres' ]; then pg_ctl -D /usr/local/var/postgres start; fi
+  - if [ $TRAVIS_OS_NAME = 'osx' ] && [ $MONEYGO_TEST_DB = 'postgres' ]; then createuser -s postgres; fi
+
+install:
+  - dep ensure
+
+# Initialize databases, if testing MySQL or Postgres
+before_script:
+  - if [ $MONEYGO_TEST_DB = 'mysql'    ]; then export MONEYGO_TEST_DSN="root@tcp(127.0.0.1:3306)/moneygo_test?parseTime=true"; fi
+  - if [ $MONEYGO_TEST_DB = 'postgres' ]; then export MONEYGO_TEST_DSN="postgres://postgres@localhost/moneygo_test?sslmode=disable"; fi
+  - if [ $MONEYGO_TEST_DB = 'mysql'    ]; then mysql -u root -e 'CREATE DATABASE IF NOT EXISTS moneygo_test;'; fi
+  - if [ $MONEYGO_TEST_DB = 'postgres' ]; then psql -c 'DROP DATABASE IF EXISTS moneygo_test;' -U postgres; fi
+  - if [ $MONEYGO_TEST_DB = 'postgres' ]; then psql -c 'CREATE DATABASE moneygo_test;' -U postgres; fi
+
+script:
+  # Don't allow the test to query for a full list of all CUSIPs
+  - touch $GOPATH/src/github.com/aclindsa/moneygo/internal/handlers/cusip_list.csv
+  # Build and test MoneyGo
+  - go generate -v github.com/aclindsa/moneygo/internal/handlers
+  - export COVER_PACKAGES="github.com/aclindsa/moneygo/internal/config,github.com/aclindsa/moneygo/internal/handlers,github.com/aclindsa/moneygo/internal/models,github.com/aclindsa/moneygo/internal/store,github.com/aclindsa/moneygo/internal/store/db,github.com/aclindsa/moneygo/internal/reports"
+  - go test -v -covermode=count -coverpkg $COVER_PACKAGES -coverprofile=integration_coverage.out github.com/aclindsa/moneygo/internal/integration
+  - go test -v -covermode=count -coverpkg $COVER_PACKAGES -coverprofile=config_coverage.out github.com/aclindsa/moneygo/internal/config
+  - go test -v -covermode=count -coverpkg $COVER_PACKAGES -coverprofile=models_coverage.out github.com/aclindsa/moneygo/internal/models
+
+# Report the test coverage
+after_script:
+  - $GOPATH/bin/goveralls -coverprofile=integration_coverage.out,config_coverage.out,models_coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN

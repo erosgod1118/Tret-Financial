@@ -1,0 +1,132 @@
+@import url("reports.css");
+
+div#content {
+	display: block;
+	width: 95%;
+	min-width: 75em;
+	max-width: 100em;
+	margin: auto;
+}
+
+.ui {
+	display: flex;
+	flex-flow: column;
+}
+.ui > div:nth-child(1), .ui > div:nth-child(2) > nav {
+	flex: none;
+}
+.ui > div:nth-child(2) {
+	display: flex;
+	flex: auto;
+	flex-flow: column;
+}
+.ui > div:nth-child(2) > div {
+	flex: auto;
+}
+
+/* Tabs */
+
+.nav-tabs {
+	margin-bottom: 15px;
+}
+
+.account-filter-menuitem > a {
+	padding: 0px 5px !important;
+}
+
+.clear-account-filter {
+	height: 34px;
+	padding: 6px;
+}
+
+/* Style the account tree */
+div.accounttree-root-nochildren {
+	position: relative;
+	left: 24px;
+}
+div.accounttree {
+	position: relative;
+	left: -24px;
+	white-space: nowrap;
+}
+div.accounttree-nochildren {
+	position: relative;
+	left: 0px;
+}
+
+div.accounttree div {
+	padding-left: 24px;
+}
+div.accounttree-root div {
+	padding-left: 24px;
+}
+.accounttree-name {
+	padding: 3px;
+}
+
+.accounttree-root {
+	display: block;
+	margin-left: 5px;
+}
+.accounttree-expandbutton {
+	padding-bottom: 6px;
+}
+.transactions-container {
+	display: block;
+	width: 100%;
+}
+.transactions-register {
+	display: block;
+	width: 100%;
+	overflow: auto;
+}
+.transactions-register-toolbar {
+	width: 100%;
+}
+td.amount-cell {
+	white-space: nowrap;
+}
+
+.register-row-editing {
+	background-color: #FFFFE0 !important;
+}
+.register-row-editing:hover {
+	background-color: #e8e8e8 !important;
+}
+.register-row-editing .form-group {
+	margin: 0;
+}
+
+.row > div > .form-group,
+.row > div > .rw-combobox {
+	margin-right: -7px;
+	margin-left: -7px;
+}
+
+.split-header {
+	font-weight: 700;
+	text-align: center;
+}
+
+.skinny-pagination {
+	margin: 0px;
+}
+
+/* Make Combobox support .has-error class */
+.has-error.rw-widget {
+	border-color: #843534;
+}
+.has-error.rw-widget.rw-state-focus {
+	border-color: #843534;
+	box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.075) inset, 0px 0px 6px #CE8483;
+}
+.has-error.rw-widget > .rw-select {
+	border-left: 1px solid #843534;
+	color: #A94442;
+	background-color: #F2DEDE;
+}
+
+/* Fix Alert Spacing inside */
+.alert.saving-transaction-alert {
+	margin: 20px 0 0 0;
+}
